@@ -2,8 +2,11 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
 import ProtectedRoute from './components/ProtectedRoute'
+import { useAuth } from './context/AuthContext'
 
 function App() {
+  const { token, logout } = useAuth();
+
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
@@ -15,6 +18,14 @@ function App() {
               <Link to="/skills" className="hover:text-brand-600">Skills</Link>
               <Link to="/blog" className="hover:text-brand-600">Blog</Link>
               <Link to="/contact" className="hover:text-brand-600">Contact</Link>
+              {token ? (
+                <div className="flex items-center gap-3">
+                  <Link to="/admin" className="px-3 py-1 bg-brand-600 text-white rounded hover:bg-brand-700">Admin</Link>
+                  <button onClick={logout} className="px-3 py-1 border rounded hover:bg-gray-50">Logout</button>
+                </div>
+              ) : (
+                <Link to="/login" className="px-3 py-1 bg-brand-600 text-white rounded hover:bg-brand-700">Login</Link>
+              )}
             </nav>
           </div>
         </header>
