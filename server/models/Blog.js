@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const blogSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, lowercase: true },
+    slug: { type: String, unique: true, lowercase: true, sparse: true },
     content: { type: String, required: true },
-    excerpt: { type: String, required: true, maxlength: 300 },
+    excerpt: { type: String, maxlength: 300, default: '' },
     tags: [{ type: String, trim: true }],
     imageUrl: { type: String },
     published: { type: Boolean, default: false },
@@ -18,7 +18,8 @@ const blogSchema = new mongoose.Schema(
 
 // Generate slug from title before saving
 blogSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
+  // Always generate slug if title exists
+  if (this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')

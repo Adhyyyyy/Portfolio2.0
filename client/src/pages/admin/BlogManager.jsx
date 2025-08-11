@@ -33,33 +33,62 @@ export default function BlogManager() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.title.trim() || !formData.content.trim()) {
+      alert('Please fill in all required fields: Title and Content');
+      return;
+    }
+
+    // Prepare data for submission
+    const submitData = {
+      ...formData,
+      title: formData.title.trim(),
+      content: formData.content.trim(),
+      excerpt: formData.excerpt.trim() || '',
+      tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+      imageUrl: formData.imageUrl.trim() || undefined
+    };
+
     if (editingPost) {
-      updatePost(editingPost._id, formData);
+      updatePost(editingPost._id, submitData);
     } else {
-      createPost(formData);
+      createPost(submitData);
     }
   }
 
   async function createPost(data) {
     try {
-      await api.post('/blog', data);
+      const response = await api.post('/blog', data);
+      console.log('Blog post created:', response.data);
       setShowForm(false);
       resetForm();
       fetchPosts();
     } catch (error) {
       console.error('Error creating blog post:', error);
+      if (error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('Error creating blog post. Please check the console for details.');
+      }
     }
   }
 
   async function updatePost(id, data) {
     try {
-      await api.put(`/blog/${id}`, data);
+      const response = await api.put(`/blog/${id}`, data);
+      console.log('Blog post updated:', response.data);
       setShowForm(false);
       setEditingPost(null);
       resetForm();
       fetchPosts();
     } catch (error) {
       console.error('Error updating blog post:', error);
+      if (error.response?.data?.message) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('Error updating blog post. Please check the console for details.');
+      }
     }
   }
 
@@ -145,7 +174,9 @@ export default function BlogManager() {
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Title *</label>
+              <label className="block text-sm font-medium mb-1">
+                Title * <span className="text-red-500">(Required)</span>
+              </label>
               <input
                 type="text"
                 required
@@ -157,17 +188,25 @@ export default function BlogManager() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Excerpt</label>
+              <label className="block text-sm font-medium mb-1">
+                Excerpt <span className="text-gray-500">(Optional, max 300 chars)</span>
+              </label>
               <textarea
+                maxLength={300}
                 value={formData.excerpt}
                 onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                 className="w-full border rounded px-3 py-2 h-20"
-                placeholder="Brief summary of the post..."
+                placeholder="Brief summary of the post (max 300 characters)..."
               />
+              <div className="text-xs text-gray-500 mt-1">
+                {formData.excerpt.length}/300 characters
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Content *</label>
+              <label className="block text-sm font-medium mb-1">
+                Content * <span className="text-red-500">(Required)</span>
+              </label>
               <textarea
                 required
                 value={formData.content}
@@ -187,6 +226,9 @@ export default function BlogManager() {
                   className="w-full border rounded px-3 py-2"
                   placeholder="e.g., react, javascript, web-dev (comma separated)"
                 />
+                <div className="text-xs text-gray-500 mt-1">
+                  Separate tags with commas
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Image URL</label>
