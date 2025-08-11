@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ProjectManager from './admin/ProjectManager';
 import SkillManager from './admin/SkillManager';
 import BlogManager from './admin/BlogManager';
+import ResumeManager from './admin/ResumeManager';
 
 export default function Admin() {
   const { user, logout } = useAuth();
@@ -24,7 +25,7 @@ export default function Admin() {
       case 'blog':
         return <BlogManager />;
       case 'resume':
-        return <div className="text-center py-16">Resume Management (coming soon)</div>;
+        return <ResumeManager />;
       default:
         return (
           <div className="text-center py-16">
